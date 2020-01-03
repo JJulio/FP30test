@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>WebMIDI examples</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	
+<style>
+.slider {
+  -webkit-appearance: none;
+  width: 200px;
+  height: 15px;
+  border-radius: 5px;  
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%; 
+  background: #4CAF50;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #4CAF50;
+  cursor: pointer;
+}
+</style>
+<script>
+var midi = null;  // global MIDIAccess object
+var midiinput = null;
+var midioutput = null;
+var midiIn = [];
+var midiOut = [];
+
+var midiloopback = false;
+var midilocal = true;
+
+function setvolumen(value=127){
+	if (midioutput)
+		midioutput.send([0xb0,0x07,value]);
+}
+
+function echoMIDIMessage( event ) {
+  //console.log(event.data)
+  if (midiloopback && midioutput) {
+    midioutput.send( event.data, event.timestamp );
+  }
+}
+
+function initDevices(midi) {
+
+  // MIDI devices that send you data.
+  const inputs = midi.inputs.values();
+  for (let input = inputs.next(); input && !input.done; input = inputs.next()) {
+    midiIn.push(input.value);
+  }
+  
+  // MIDI devices that you send data to.
+  const outputs = midi.outputs.values();
+  for (let output = outputs.next(); output && !output.done; output = outputs.next()) {
+    midiOut.push(output.value);
+  }
+  
+  var select = document.getElementById("selectInterface");
+  var options = midiIn;
+  for(var i = 0; i < options.length; i++) {
+    var opt = options[i].name;
+    var el = document.createElement("option");
+    el.textContent = opt;
+    el.value = opt;
+    select.appendChild(el);
+	}
+  //displayDevices();
+  //startListening();
+}
+
+function selectedInterface(e){
+  var selectint = document.getElementById("selectInterface");
+  //alert(select.options[select.selectedIndex].index);
+  var interfacename = midiIn[selectint.options[selectint.selectedIndex].index-1].name
+  alert(interfacename);
+  // Search this name on midi outputs
+  for (var i=0;i<midiOut.length;i++)
+	if (midiOut[i].name == interfacename){
+		// Connect midioutput
+		midioutput = midiOut[i]
+		alert("Midi output "+midioutput.name)
+		break;
+	}
+  midiinput = midiIn[selectint.options[selectint.selectedIndex].index-1]
+  midiinput.onmidimessage = echoMIDIMessage;
+  //alert(midiinput.name);
+}
+
+function onMIDISuccess( midiAccess ) {
+  
+  console.log( "MIDI sucess!" );
+  midi = midiAccess
+  initDevices(midi);
+  //if (!midiinput || !midioutput)
+  //  console.log("Uh oh! Couldn't get i/o ports.");
+}
+
+function onMIDIFailure(msg) {
+  console.log( "Failed to get MIDI access - " + msg );
+  alert("Failed to get MIDI access - " + msg)
+}
+
+function selectmidilocal(cb){
+	midilocal=cb.checked;
+	// Send midi loopback command
+	if (midilocal)
+		data = [0xb0,0x7A,0x7F];
+	else
+		data = [0xb0,0x7A,0x00];
+	midioutput.send(data);
+}
+
+function selectloopback(cb){
+	midiloopback=cb.checked; 
+}
+
+navigator.requestMIDIAccess().then( onMIDISuccess, onMIDIFailure );
+</script>
+</head>
+<body>
+	<h1> FP30 Experimental app </h1>
+	<select id="selectInterface" oninput="selectedInterface()">
+	<option>Choose Midi interface</option>
+	</select>
+	<div>
+		<input type="checkbox" id="cbox1" checked=true onchange="selectmidilocal(this);"> <label>Main keyboard (Midi local)</label>
+	</div>
+	<div>	
+		<input type="checkbox" id="cbox2" onchange="selectloopback(this);"> <label>Added sounds (Midi loopback)</label>
+	</div>
+	<div class="slidecontainer">
+		<input type="range" min="0" max="127" value="127" class="slider" id="volumen" oninput="setvolumen(this.value);"><label>Volumen</label>
+	</div>
+</body>
+</html>
