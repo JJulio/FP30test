@@ -107,7 +107,8 @@ function selectedInterface(e){
 function onMIDISuccess( midiAccess ) {
   
   console.log( "MIDI sucess!" );
-  midi = midiAccess
+  midi = midiAccess;
+  alert("midi success");
   initDevices(midi);
   //if (!midiinput || !midioutput)
   //  console.log("Uh oh! Couldn't get i/o ports.");
