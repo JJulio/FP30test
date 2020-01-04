@@ -88,6 +88,7 @@ function initDevices(midi) {
 
 function selectedInterface(e){
   var selectint = document.getElementById("selectInterface");
+  alert("selected");
   //alert(select.options[select.selectedIndex].index);
   var interfacename = midiIn[selectint.options[selectint.selectedIndex].index-1].name
   alert(interfacename);
