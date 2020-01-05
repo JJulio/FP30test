@@ -1,148 +1,153 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
-<script type="text/javascript">
-    var midiAccess = null;
-    var midiInputs = null;
-    var midiOutputs = null;
-
-    function printString(str) {
-        var messagelog = document.getElementById('messagelog');
-        messagelog.innerHTML += str + "\n";
-        messagelog.scrollTop = messagelog.scrollHeight;
-    }
-
-    function printReceivedMessage(portName, data) {
-        var str = "port:" + portName + " ";
-        for (var i = 0; i < data.length; i++) {
-            str += data[i].toString(16) + " ";
-        }
-
-        printString(str);
-    }
-
-    function clearLog() {
-        document.getElementById("messagelog").innerHTML = "";
-    }
-
-    function setup() {
-        var messagelog = document.getElementById('messagelog');
-        if (window.navigator.requestMIDIAccess) {
-            window.navigator.requestMIDIAccess({sysex:false}).then( success, function() { messagelog.innerHTML += "requestMIDIAccess() failed."; });
-        } else {
-            messagelog.innerHTML += "Web MIDI API is not available on your browser.\n";
-        }
-
-        function setupEventHandler() {
-            var inputs = [];
-            var iter = midiAccess.inputs.values();
-            for (var o = iter.next(); !o.done; o = iter.next()) {
-                inputs.push(o.value);
-            }
-
-            for (var port = 0; port < inputs.length; port++) {
-                inputs[port].onmidimessage = function (event) {
-                    printReceivedMessage(event.port, event.data);
-                };
-
-                inputs[port].onstatechange = function (event) {
-                    var port = event.port;
-                    printString("MIDIInputPort onstatechange name:" + port.name + " connection:" + port.connection + " state:" + port.state);
-                };
-            }
-
-            var outputs = [];
-            var iter = midiAccess.outputs.values();
-            for (var o = iter.next(); !o.done; o = iter.next()) {
-                outputs.push(o.value);
-            }
-
-            for (var port = 0; port < outputs.length; port++) {
-                outputs[port].onstatechange = function (event) {
-                    var port = event.port;
-                    printString("MIDIOutputPort onstatechange name:" + port.name + " connection:" + port.connection + " state:" + port.state);
-                };
-            }
-
-            midiInputs = inputs;
-            midiOutputs = outputs;
-        }
-
-        function success(access) {
-            midiAccess = access;
-            midiAccess.onstatechange = function(event) {
-                var port = event.port;
-                printString("MIDIAccess onstatechange name:" + port.name + " connection:" + port.connection + " state:" + port.state);
-
-                if (port.type == "input") {
-                    port.onmidimessage = function (event) {
-                        printReceivedMessage(port.name, event.data);
-                    };
-                }
-            };
-
-            setupEventHandler();
-        }
-    }
-
-    function noteOn() {
-        var iter = midiAccess.outputs.values();
-        for (var o = iter.next(); !o.done; o = iter.next()) {
-            o.value.send( [0x90, 60, 0x40] , window.performance.now() );
-        }
-    }
-
-    function noteOff() {
-        var iter = midiAccess.outputs.values();
-        for (var o = iter.next(); !o.done; o = iter.next()) {
-            o.value.send( [0x80, 60, 0x00] , window.performance.now() );
-        }
-    }
-
-    window.onload = function() {
-        setup();
-    }
-</script>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<style type="text/css">
-.button {
-    color: #000000;
-    font-family: sans-serif;
-    font-weight: bold;
-    text-align: center;
-    text-decoration: none;
-    border: 2px solid #cccccc;
-    border-radius: 10px;
-    padding: 10px 0;
-    display: block;
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>WebMIDI examples</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	
+<style>
+.slider {
+  -webkit-appearance: none;
+  width: 200px;
+  height: 15px;
+  border-radius: 5px;  
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
 }
 
-.messagelog {
-    background: #eeeeee;
-    border: 2px solid #888888;
-    border-radius: 10px;
-    padding: 10px;
-    height: 20%;
-    overflow: auto;
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%; 
+  background: #4CAF50;
+  cursor: pointer;
 }
 
-.title {
-    color: #777777;
-    font-family: sans-serif;
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #4CAF50;
+  cursor: pointer;
 }
-
-html,body {
-    overflow: hidden;
-    height: 100%;
-}
-
 </style>
+<script type="text/javascript">
+var midi = null;  // global MIDIAccess object
+var midiinput = null;
+var midioutput = null;
+var midiIn = [];
+var midiOut = [];
+
+var midiloopback = false;
+var midilocal = true;
+
+function setvolumen(value=127){
+	if (midioutput)
+		midioutput.send([0xb0,0x07,value]);
+}
+
+function echoMIDIMessage( event ) {
+  //console.log(event.data)
+  if (midiloopback && midioutput) {
+    midioutput.send( event.data, event.timestamp );
+  }
+}
+
+function initDevices(midi) {
+
+  // MIDI devices that send you data.
+  const inputs = midi.inputs.values();
+  for (let input = inputs.next(); input && !input.done; input = inputs.next()) {
+    midiIn.push(input.value);
+  }
+  
+  // MIDI devices that you send data to.
+  const outputs = midi.outputs.values();
+  for (let output = outputs.next(); output && !output.done; output = outputs.next()) {
+    midiOut.push(output.value);
+  }
+  
+  var select = document.getElementById("selectInterface");
+  var options = midiIn;
+  for(var i = 0; i < options.length; i++) {
+    var opt = options[i].name;
+    var el = document.createElement("option");
+    el.textContent = opt;
+    el.value = opt;
+    select.appendChild(el);
+	}
+  //displayDevices();
+  //startListening();
+}
+
+function selectedInterface(index){
+  //var selectint = document.getElementById("selectInterface");
+  //alert(select.options[select.selectedIndex].index);
+  //var interfacename = midiIn[selectint.options[selectint.selectedIndex].index-1].name
+  alert(index);
+  // Search this name on midi outputs
+  //for (var i=0;i<midiOut.length;i++)
+	//if (midiOut[i].name == interfacename){
+		// Connect midioutput
+	//	midioutput = midiOut[i]
+	//	alert("Midi output "+midioutput.name)
+	//	break;
+	//}
+  //midiinput = midiIn[selectint.options[selectint.selectedIndex].index-1]
+  //midiinput.onmidimessage = echoMIDIMessage;
+  //alert(midiinput.name);
+}
+
+function onMIDISuccess( midiAccess ) {
+  
+  console.log( "MIDI sucess!" );
+  midi = midiAccess
+  initDevices(midi);
+  //if (!midiinput || !midioutput)
+  //  console.log("Uh oh! Couldn't get i/o ports.");
+}
+
+function onMIDIFailure(msg) {
+  console.log( "Failed to get MIDI access - " + msg );
+  alert("Failed to get MIDI access - " + msg)
+}
+
+function selectmidilocal(cb){
+	midilocal=cb.checked;
+	// Send midi loopback command
+	if (midilocal)
+		data = [0xb0,0x7A,0x7F];
+	else
+		data = [0xb0,0x7A,0x00];
+	midioutput.send(data);
+}
+
+function selectloopback(cb){
+	midiloopback=cb.checked; 
+}
+
+navigator.requestMIDIAccess().then( onMIDISuccess, onMIDIFailure );
+</script>
 </head>
 <body>
-<h2 class="title">MIDI input monitor</h2>
-<pre id="messagelog" class="messagelog">
-</pre>
-<a href="javascript:clearLog()" class="button">Clear</a>
-<h2 class="title">MIDI output test</h2>
-<a href="javascript:noteOn()" class="button" style="width: 48%; float: left;">Note On C3</a>
-<a href="javascript:noteOff()" class="button" style="width: 48%; float: right;">Note Off C3</a>
+	<h1> FP30 Experimental app </h1>
+	<select id="selectInterface" onchange="selectedInterface(this.value);">
+	<option>Choose Midi interface</option>
+	</select>
+	<div>
+		<input type="checkbox" id="cbox1" checked=true onchange="selectmidilocal(this);"> <label>Main keyboard (Midi local)</label>
+	</div>
+	<div>	
+		<input type="checkbox" id="cbox2" onchange="selectloopback(this);"> <label>Added sounds (Midi loopback)</label>
+	</div>
+	<div class="slidecontainer">
+		<input type="range" min="0" max="127" value="127" class="slider" id="volumen" oninput="setvolumen(this.value);"><label>Volumen</label>
+	</div>
 </body>
 </html>
