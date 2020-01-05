@@ -86,11 +86,11 @@ function initDevices(midi) {
   //startListening();
 }
 
-function selectedInterface(index){
-  //var selectint = document.getElementById("selectInterface");
-  //alert(select.options[select.selectedIndex].index);
+function selectedInterface(){
+  var selectint = document.getElementById("selectInterface");
+  alert(selectint.options[selectint.selectedIndex].index);
   //var interfacename = midiIn[selectint.options[selectint.selectedIndex].index-1].name
-  alert(index);
+  //alert(index);
   // Search this name on midi outputs
   //for (var i=0;i<midiOut.length;i++)
 	//if (midiOut[i].name == interfacename){
@@ -137,9 +137,12 @@ navigator.requestMIDIAccess().then( onMIDISuccess, onMIDIFailure );
 </head>
 <body>
 	<h1> FP30 Experimental app </h1>
-	<select id="selectInterface">
+	<div>
+	<select id="selectInterface" onchange="selectedInterface(this.value);">
 	<option>Choose Midi interface</option>
 	</select>
+	<button onclick="selectedInterface()">Connect!</button>
+	<div>
 	<div>
 		<input type="checkbox" id="cbox1" checked=true onchange="selectmidilocal(this);"> <label>Main keyboard (Midi local)</label>
 	</div>
