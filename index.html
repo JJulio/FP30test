@@ -9,26 +9,25 @@
 <style>
 
     body{
-	font-family:'Roboto',sans-serif;
-	font-size:12pt;
+	font-family:sans-serif;
+	font-size:11pt;
 	background-color:#eeeeee
 	}
 	
 	h2{
-	font-family:'Roboto',sans-serif;
 	color:#777777;
 	margin-left:8px;
 	}
 	
 	select{
-	font-size:12pt;
+	font-size:11pt;
 	border-radius: 4px;
 	}
 	
 	button{
-	font-size:12pt;
+	font-size:11pt;
 	border-radius: 4px;
-	background-color:#bbccff;
+	background-color:#bbccee;
 	}
 	
 	div{
@@ -114,7 +113,7 @@ function selectedSound(){
 	if (midioutput){
 		midioutput.send([0xb0+part,0x00,msb]);  // bank msb  
 		midioutput.send([0xb0+part,0x20,lsb]);  // bank lsb
-		midioutput.send([0xc0+part,pc]);        // program change
+		midioutput.send([0xc0+part,pc-1]);        // program change
 		}
 }
 
@@ -162,7 +161,9 @@ function selectedInterface(){
 	if (midiOut[i].name == interfacename){
 		// Connect midioutput
 		midioutput = midiOut[i]
-		alert("Connected to: "+midioutput.name)
+		//alert("Connected to: "+midioutput.name)
+		$("#con").text("Connected!");
+		$("#con").css("color","#008000");
 		break;
 	}
   midiinput = midiIn[selectint.options[selectint.selectedIndex].index-1]
@@ -227,7 +228,8 @@ function setup(){
 	<div><select id="selectInterface">
 	<option>Choose Midi interface</option>
 	</select>
-	<button onclick="selectedInterface()">Connect!</button>
+	<button onclick="selectedInterface()">Connect</button>
+	<label id="con" style="color:#777;">&nbsp;Not connected</label>
 	</div>
 	<div>
 		<input type="checkbox" id="cbox1" checked=true onchange="selectmidilocal(this);"> <label>Main keyboard (Midi local)</label>
@@ -237,7 +239,7 @@ function setup(){
 	</div>
 	<div>
 		<select id="selectSound"></select>
-		<button onclick="selectedSound()">Set sound</button>
+		<button onclick="selectedSound()">SET</button>
 	</div>
 	<div><input type="range" min="0" max="127" value="127" class="slider" id="volumen" oninput="setvolumen(this.value);"><label>&nbsp;Volumen&nbsp;-&nbsp;</label><label id="vol">127</label></div>
 	<div><input type="range" min="0" max="127" value="0" class="slider" id="reverb" oninput="setreverb(this.value);"><label>&nbsp;Reverb&nbsp;-&nbsp;</label><label id="rev">0</label></div>
