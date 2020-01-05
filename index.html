@@ -79,7 +79,7 @@ var midilocal = true;
 
 function reset(){
 	if (midioutput)
-      midioutput.send_message([0xb0,0x79,0x00]) //#Reset all
+      midioutput.send([0xb0,0x79,0x00]) //#Reset all
 }
 
 function setvolumen(value=127){
