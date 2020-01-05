@@ -156,13 +156,13 @@ function selectedInterface(){
   var selectint = document.getElementById("selectInterface");
   //alert(selectint.options[selectint.selectedIndex].index);
   var interfacename = midiIn[selectint.options[selectint.selectedIndex].index-1].name
-  alert(interfacename);
+  //alert(interfacename);
   // Search this name on midi outputs
   for (var i=0;i<midiOut.length;i++)
 	if (midiOut[i].name == interfacename){
 		// Connect midioutput
 		midioutput = midiOut[i]
-		alert("Midi output "+midioutput.name)
+		alert("Connected to: "+midioutput.name)
 		break;
 	}
   midiinput = midiIn[selectint.options[selectint.selectedIndex].index-1]
