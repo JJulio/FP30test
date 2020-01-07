@@ -22,6 +22,7 @@
 	}
 	
 	fieldset{
+		font-size:11pt;
 		margin:0px;
 		border-color:#777;
 		border-radius: 8px;
@@ -172,7 +173,7 @@ function setdecay(value=64){
 }
 
 function changepart(value){
-	alert(value);
+	//alert(value);
 	part = value;
 }
 
@@ -316,7 +317,7 @@ function setup(){
 	<option>Choose Midi interface</option>
 	</select>
 	<button onclick="selectedInterface()">Connect</button>
-	<label id="con" style="color:#777;">&nbsp;Not connected</label>
+	<label id="con" style="color:#777;font-size:11pt;">&nbsp;Not connected</label>
 	</div>
 	<fieldset>
 	<div style="margin-top:10px;">
@@ -327,7 +328,7 @@ function setup(){
 		<input type="checkbox" id="midisustain" onchange="selectmidisustain(this);"> <label>Sustain(CC)</label>
 	</div>
 	</fieldset>
-	<div id="radioset" style="padding:4px;margin:0px;font-size:11pt;">
+	<div id="radioset" style="padding:4px;margin:0px;font-size:10pt;">
 		<input type="radio" id="part1" name="radio" onchange="changepart(0);" checked="checked"><label for="part1">Part 1(main)</label>
 		<input type="radio" id="part3" name="radio" onchange="changepart(2);"><label for="part3">Part 3(split)</label>
 		<input type="radio" id="part5" name="radio" onchange="changepart(4);"><label for="part5">Part 5(dual)</label>
