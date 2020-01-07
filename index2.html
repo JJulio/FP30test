@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>FP30 playground webmidi</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">		
+	<link href="./css/jquery-ui.css" rel="stylesheet">
+<style>
+    body{
+		font-family: "Trebuchet MS", sans-serif;
+		margin: 30px;
+		background:#333;
+		color:#CCC;		
+	}
+	
+	label{
+		margin:5px;			
+	}
+	
+	fieldset{
+		margin:4px;
+		border-color:#777;
+		border-radius: 8px;
+	}
+	
+	.slider{
+		width:80%;
+		margin:5px;
+	}
+	
+	
+
+</style>
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="./js/jquery-ui.min.js"></script>
+<script type="text/javascript">
+var midi = null;  // global MIDIAccess object
+var midiinput = null;
+var midioutput = null;
+var midiIn = [];
+var midiOut = [];
+var sounds=null;
+var part=0;
+
+var midiloopback = false;
+var midilocal = true;
+var midisustain = true;
+
+function reset(){
+	if (midioutput)
+      midioutput.send([0xb0,0x79,0x00]); //#Reset all
+}
+
+function setvolumen(value=127){
+	$("#vol").text(value);
+	if (midioutput)
+		midioutput.send([0xb0+part,0x07,value]);
+}
+
+function setexpression(value=127){
+	if (midioutput)
+		midioutput.send([0xb0+part,0x11,value]);
+}
+
+function setreverb(value=0){
+	$("#rev").text(value);
+	if (midioutput)
+		midioutput.send([0xb0+part,91,value]);
+}
+
+function setchorus(value=0){
+	$("#cho").text(value);
+	if (midioutput)
+		midioutput.send([0xb0+part,93,value]);
+}
+
+function selectedSound(){
+	var select = $("#selectSound")[0];
+	var pc = sounds["voice"][select.selectedIndex]["PC"];
+	var msb = sounds["voice"][select.selectedIndex]["MSB"];
+	var lsb = sounds["voice"][select.selectedIndex]["LSB"];
+	//alert (select.selectedIndex+" "+pc+" "+msb+" "+lsb);
+	if (midioutput){
+		midioutput.send([0xb0+part,0x00,msb]);  // bank msb  
+		midioutput.send([0xb0+part,0x20,lsb]);  // bank lsb
+		midioutput.send([0xc0+part,pc-1]);        // program change
+		}
+}
+
+function echoMIDIMessage( event ) {
+  //console.log(event.data)
+  if (midiloopback && midioutput) {
+    midioutput.send( event.data, event.timestamp );
+  }
+}
+
+function initDevices(midi) {
+
+  // MIDI devices that send you data.
+  const inputs = midi.inputs.values();
+  for (let input = inputs.next(); input && !input.done; input = inputs.next()) {
+    midiIn.push(input.value);
+  }
+  
+  // MIDI devices that you send data to.
+  const outputs = midi.outputs.values();
+  for (let output = outputs.next(); output && !output.done; output = outputs.next()) {
+    midiOut.push(output.value);
+  }
+  
+  var select = document.getElementById("selectInterface");
+  var options = midiIn;
+  for(var i = 0; i < options.length; i++) {
+    var opt = options[i].name;
+    var el = document.createElement("option");
+    el.textContent = opt;
+    el.value = opt;
+    select.appendChild(el);
+	}
+}
+
+function selectedInterface(){
+  var selectint = document.getElementById("selectInterface");
+  //alert(selectint.options[selectint.selectedIndex].index);
+  if (selectint.selectedIndex==0)
+	return;
+  var interfacename = midiIn[selectint.options[selectint.selectedIndex].index-1].name
+  //alert(interfacename);
+  // Search this name on midi outputs
+  for (var i=0;i<midiOut.length;i++)
+	if (midiOut[i].name == interfacename){
+		// Connect midioutput
+		midioutput = midiOut[i]
+		//alert("Connected to: "+midioutput.name)
+		$("#con").text("Connected!");
+		$("#con").css("color","#008000");
+		break;
+	}
+  midiinput = midiIn[selectint.options[selectint.selectedIndex].index-1]
+  midiinput.onmidimessage = echoMIDIMessage;
+  //alert(midiinput.name);
+  // Reset
+  reset();
+  setvolumen(127);
+  setexpression(127);
+  setreverb(0x0e);
+  setchorus(0);
+}
+
+function onMIDISuccess( midiAccess ) {
+  
+  console.log( "MIDI sucess!" );
+  midi = midiAccess
+  initDevices(midi);
+  //if (!midiinput || !midioutput)
+  //  console.log("Uh oh! Couldn't get i/o ports.");
+}
+
+function onMIDIFailure(msg) {
+  console.log( "Failed to get MIDI access - " + msg );
+  alert("Failed to get MIDI access - " + msg)
+}
+
+function selectmidilocal(cb){
+	
+	midilocal=cb;
+	// Send midi loopback command
+	if (midilocal){
+		data = [0xb0,0x7A,0x7F];
+		//alert("local true");
+		}
+	else{
+		data = [0xb0,0x7A,0x00];
+		//alert("local false");
+		}
+	if (midioutput)
+		midioutput.send(data);
+}
+
+function selectloopback(cb){
+	//alert("loopback:",cb);
+	midiloopback=cb; 	
+	$("#midisustain")[0].checked=cb;
+	$("#controlgroup").controlgroup("refresh");
+	//$("#midisustain").refresh();
+}
+
+function selectsustain(cb){
+	//alert("sustain:",cb);
+	midisustain=cb; 
+}
+
+function setup(){
+	navigator.requestMIDIAccess({sysex:true}).then( onMIDISuccess, onMIDIFailure );
+	$.getJSON( "https://jjulio.github.io/FP30test/sounds2.json", function(data) {
+		console.log( "sounds load success" );
+		sounds = data["voices"]
+		var select = $("#selectSound")[0];
+		//var select = document.getElementById("selectSound");
+		for(var i = 0; i < sounds["voice"].length; i++) {
+			var opt = sounds["voice"][i]["Set"]+"-"+sounds["voice"][i]["Category"]+"-"+sounds["voice"][i]["content"];
+			var el = document.createElement("option");
+			el.textContent = opt;
+			el.value = opt;
+			select.appendChild(el);
+			}		
+		$("#selectSound").selectmenu("refresh");
+		});		
+}
+</script>
+<body onload="setup();">
+	<h2>FP30 Playground</h2>
+	<div>
+	<select id="selectInterface" name="selectinterface">
+	<option>Choose Midi interface</option>
+	</select>	
+	<button id="connect" name="connect" onclick="selectedInterface()">Connect</button>
+	<label id="con" style="color:#777;">&nbsp;Not connected</label>
+	</div>
+	<fieldset>
+	<div id="controlgroup">
+		<label for="midilocal">Main keyboard (Midi local)</label><input type="checkbox" name="midilocal" id="midilocal" checked=true onchange="selectmidilocal(this.checked);">
+		<p></p>
+		<label for="midiloopback">Added sounds (Midi loopback)</label><input type="checkbox" name="midiloopback" id="midiloopback" onchange="selectloopback(this.checked);">		
+		<label style="margin-left:5px;" for="midisustain">Sustain (CCs...)</label><input type="checkbox" name="midisustain" id="midisustain" onchange="selectsustain(this.checked);">		
+	</div>
+	</fieldset>
+	<div>
+		<label for="selectSound">SOUND:</label>
+		<select id="selectSound" name="selectSound"></select>
+		<!--<button onclick="selectedSound()">SET</button>-->
+	</div>
+	<label>Volume</label><label id="vol">127</label><div class="slider" id="volumen" name="volumen"></div>
+	<label>Reverb</label><label id="rev">0  </label><div class="slider" id="reverb" name="reverb"></div>
+	<label>Chorus</label><label id="cho">0  </label><div class="slider" id="chorus" name="chorus"></div>	
+	
+	<script>
+	// Build jquery UI interface
+	$("#selectInterface").selectmenu({change: function(event,data){selectedInterface();}});
+	$("#connect").button();
+	$("#controlgroup").controlgroup();
+	$("#selectSound").selectmenu({ width : 'auto',change: function(event,data){selectedSound();}});
+	$("#volumen").slider({slide: function(event,data){setvolumen(data.value);},min:0,max:127,value:127});
+	$("#reverb").slider({slide: function(event,data){setreverb(data.value);},min:0,max:127,value:0});	
+	$("#chorus").slider({slide: function(event,data){setchorus(data.value);},min:0,max:127,value:0});	
+	</script>
+</body>
+</html>
