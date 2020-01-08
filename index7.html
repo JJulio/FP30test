@@ -475,7 +475,7 @@ function canvaststart(canvas){
 	var x = parseInt(touch.clientX-offsetX);
 	var y = parseInt(touch.clientY-offsetY);
 	var ctx = canvas.getContext('2d');
-	ctx.fillRect(x,y, 20, 20);
+	ctx.fillRect(x,y, 8, 8);
 	canvas.pendown=true;
 	var centerx = canvas.width/2;
 	var centery = canvas.height/2;				
@@ -485,8 +485,8 @@ function canvaststart(canvas){
 		modulation = Math.min(Math.max(parseInt((centery-y)*128/centery),0),127);
 	setpitchbend(pitchbend);
 	setmodulation(modulation);
-	$("#pblabel").text(pitchbend+" "+x+" "+offsetX);
-	$("#molabel").text(modulation+" "+y+" "+offsetY);
+	//$("#pblabel").text(pitchbend+" "+x+" "+offsetX);
+	//$("#molabel").text(modulation+" "+y+" "+offsetY);
 }
 
 function canvastmove(canvas){
@@ -503,7 +503,7 @@ function canvastmove(canvas){
 	if (canvas.pendown){
 		e = window.event;
 		var ctx = canvas.getContext('2d');
-		ctx.fillRect(x,y, 5, 5);
+		ctx.fillRect(x,y, 8, 8);
 		var centerx = canvas.width/2;
 		var centery = canvas.height/2;				
 		var pitchbend = Math.min(Math.max(parseInt((x*128)/canvas.width), 0), 127);
@@ -512,8 +512,8 @@ function canvastmove(canvas){
 			modulation = Math.min(Math.max(parseInt((centery-y)*128/centery),0),127);
 		setpitchbend(pitchbend);
 		setmodulation(modulation);
-		$("#pblabel").text(pitchbend+" "+x+" "+offsetX);
-		$("#molabel").text(modulation+" "+y+" "+offsetY);
+		//$("#pblabel").text(pitchbend+" "+x+" "+offsetX);
+		//$("#molabel").text(modulation+" "+y+" "+offsetY);
 		}
 }
 
