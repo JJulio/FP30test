@@ -469,8 +469,11 @@ function canvaststart(canvas){
 		e.preventDefault();
 	}
 	var touch = e.touches[0];
-	var x = parseInt(touch.clientX-canvas.offsetLeft);
-	var y = parseInt(canvas.offsetTop- touch.clientY);
+	var BB = canvas.getBoundingClientRect();
+    var offsetX=BB.left;
+    var offsetY=BB.top;   
+	var x = parseInt(touch.clientX-offsetX);
+	var y = parseInt(touch.clientY-offsetY);
 	var ctx = canvas.getContext('2d');
 	ctx.fillRect(x,y, 20, 20);
 	canvas.pendown=true;
@@ -482,8 +485,8 @@ function canvaststart(canvas){
 		modulation = Math.min(Math.max(parseInt((centery-y)*128/centery),0),127);
 	setpitchbend(pitchbend);
 	setmodulation(modulation);
-	$("#pblabel").text(pitchbend+" "+x+" "+canvas.offsetLeft);
-	$("#molabel").text(modulation+" "+y+" "+canvas.offsetTop);
+	$("#pblabel").text(pitchbend+" "+x+" "+offsetX);
+	$("#molabel").text(modulation+" "+y+" "+offsetY);
 }
 
 function canvastmove(canvas){
@@ -492,8 +495,11 @@ function canvastmove(canvas){
 		e.preventDefault();
 	}
 	var touch = e.touches[0];
-	var x = parseInt(touch.clientX-canvas.offsetLeft);
-	var y = parseInt(canvas.offsetY- touch.clientY);
+	var BB = canvas.getBoundingClientRect();
+    var offsetX=BB.left;
+    var offsetY=BB.top;   
+	var x = parseInt(touch.clientX-offsetX);
+	var y = parseInt(touch.clientY-offsetY);
 	if (canvas.pendown){
 		e = window.event;
 		var ctx = canvas.getContext('2d');
@@ -506,8 +512,8 @@ function canvastmove(canvas){
 			modulation = Math.min(Math.max(parseInt((centery-y)*128/centery),0),127);
 		setpitchbend(pitchbend);
 		setmodulation(modulation);
-		$("#pblabel").text(pitchbend+" "+x+" "+canvas.offsetLeft);
-		$("#molabel").text(modulation+" "+y+" "+canvas.offsetY);
+		$("#pblabel").text(pitchbend+" "+x+" "+offsetX);
+		$("#molabel").text(modulation+" "+y+" "+offsetY);
 		}
 }
 
@@ -623,7 +629,7 @@ function canvasup(canvas){
 	<!--<fieldset style="margin:0px;padding:0px;">-->
 	<fieldset>
 	<div style="margin:2px;padding:0px;"><label>Pitch Bend(<-->)</label><label class="labslide" id="pblabel">64</label><label> - Modulation(up)</label><label class="labslide" id="molabel">0</label></div>
-	<div style="margin:0px;padding:0px;"><canvas id="myCanvas" width="360" height="150" 
+	<div style="margin:0px;padding:0px;"><canvas id="myCanvas" width="340" height="150" 
 		onmousedown="canvasdown(this);" onmousemove="canvasmove(this);" onmouseup="canvasup(this);" 
 		ontouchend="canvastend(this);" ontouchstart="canvaststart(this);" ontouchmove="canvastmove(this);"></canvas></div>
 	</fieldset>
