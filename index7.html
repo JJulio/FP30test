@@ -470,7 +470,7 @@ function canvaststart(canvas){
 	}
 	var touch = e.touches[0];
 	var x = touch.clientX-canvas.offsetLeft;
-	var y = touch.clientY-canvas.offsetTop;
+	var y = canvas.offsetTop- touch.clientY;
 	var ctx = canvas.getContext('2d');
 	ctx.fillRect(x,y, 20, 20);
 	canvas.pendown=true;
@@ -493,7 +493,7 @@ function canvastmove(canvas){
 	}
 	var touch = e.touches[0];
 	var x = touch.clientX-canvas.offsetLeft;
-	var y = touch.clientY-canvas.offsetTop;
+	var y = canvas.offsetTop- touch.clientY;
 	if (canvas.pendown){
 		e = window.event;
 		var ctx = canvas.getContext('2d');
