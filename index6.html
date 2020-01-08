@@ -459,8 +459,8 @@ function canvaststart(canvas){
   }
   var touch = e.touches[0];
   var mouseEvent = new MouseEvent("mousedown", {
-    clientX: touch.clientX- canvas.offsetLeft,
-    clientY: touch.clientY+ canvas.offsetTop
+    clientX: canvas.offsetLeft-touch.clientX,
+    clientY: canvas.offsetTop-touch.clientY
   });
   canvas.dispatchEvent(mouseEvent);
 }
@@ -481,8 +481,8 @@ function canvastmove(canvas){
   }
   var touch = e.touches[0];
   var mouseEvent = new MouseEvent("mousemove", {
-    clientX: touch.clientX- canvas.offsetLeft,
-    clientY: touch.clientY+ canvas.offsetTop
+    clientX: canvas.offsetLeft-touch.clientX,
+    clientY: canvas.offsetTop-touch.clientY
   });
   canvas.dispatchEvent(mouseEvent);
 }
