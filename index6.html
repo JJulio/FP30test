@@ -466,14 +466,10 @@ function canvaststart(canvas){
 }
 
 function canvastend(canvas){
-  e = window.event;
-  if (e.target == canvas) {
-    e.preventDefault();
-  }
-  var touch = e.touches[0];
+
   var mouseEvent = new MouseEvent("mouseup", {
-    clientX: touch.clientX,
-    clientY: touch.clientY
+    clientX: 0,
+    clientY: 0
   });
   canvas.dispatchEvent(mouseEvent);
 }
@@ -601,7 +597,7 @@ function canvasup(canvas){
 	<div style="margin:2px;padding:0px;"><label>Pitch Bend(<-->)</label><label class="labslide" id="pblabel">64</label><label> - Modulation(up)</label><label class="labslide" id="molabel">0</label></div>
 	<div style="margin:0px;padding:0px;"><canvas id="myCanvas" width="360" height="150" 
 		onmousedown="canvasdown(this);" onmousemove="canvasmove(this);" onmouseup="canvasup(this);" 
-		ontouchend="canvatend(this);;" ontouchstart="canvaststart(this);" ontouchmove="canvastmove(this);"></canvas></div>
+		ontouchend="canvastend(this);" ontouchstart="canvaststart(this);" ontouchmove="canvastmove(this);"></canvas></div>
 	</fieldset>
 	<div>
 	<label>Sound PC:</label><input type="text" id="pc" value="-">
@@ -627,7 +623,7 @@ function canvasup(canvas){
 		console.log("Midi local on...");
 		var data = [0xb0,0x7A,0x7F];	
 		if (midioutput)
-		    midioutput.send(data);
+			midioutput.send(data);
 		});
 	</script>
 </body>
