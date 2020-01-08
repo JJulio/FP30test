@@ -517,8 +517,8 @@ function canvasmove(canvas){
 			modulation = Math.min(Math.max(parseInt((centery-e.offsetY)*128/centery),0),127);
 		setpitchbend(pitchbend);
 		setmodulation(modulation);
-		$("#pblabel").text(pitchbend+" "+e.offsetX);
-		$("#molabel").text(modulation+" "+e.offsetY);
+		$("#pblabel").text(pitchbend+" "+e.offsetX+" "+canvas.offsetLeft);
+		$("#molabel").text(modulation+" "+e.offsetY+" "+canvas.offsetTop);
 		}
 }
 
