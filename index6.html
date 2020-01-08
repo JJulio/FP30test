@@ -498,23 +498,27 @@ function canvasdown(canvas){
 	var modulation = 0;
 	if ((e.offsetY-centery)<0)
 		modulation = Math.min(Math.max(parseInt((centery-e.offsetY)*128/centery),0),127);
-	setpitchbend(pitchbend);
-	setmodulation(modulation);
+	//setpitchbend(pitchbend);
+	//setmodulation(modulation);
+	$("#pblabel").text(e.offsetX);
+	$("#molabel").text(e.offsetY);
 }
 
 function canvasmove(canvas){
 	if (canvas.pendown){
 		e = window.event;
 		var ctx = canvas.getContext('2d');
-		ctx.fillRect(e.offsetX, e.offsetY, 3, 3);
+		ctx.fillRect(e.offsetX, e.offsetY, 5, 5);
 		var centerx = canvas.width/2;
 		var centery = canvas.height/2;				
 		var pitchbend = Math.min(Math.max(parseInt((e.offsetX*128)/canvas.width), 0), 127);
 		var modulation = 0;
 		if ((e.offsetY-centery)<0)
 			modulation = Math.min(Math.max(parseInt((centery-e.offsetY)*128/centery),0),127);
-		setpitchbend(pitchbend);
-		setmodulation(modulation);
+		//setpitchbend(pitchbend);
+		//setmodulation(modulation);
+		$("#pblabel").text(e.offsetX);
+		$("#molabel").text(e.offsetY);
 		}
 }
 
