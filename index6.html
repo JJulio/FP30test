@@ -460,7 +460,7 @@ function canvaststart(canvas){
   var touch = e.touches[0];
   var mouseEvent = new MouseEvent("mousedown", {
     clientX: touch.clientX- canvas.offsetLeft,
-    clientY: touch.clientY- canvas.offsetTop
+    clientY: touch.clientY+ canvas.offsetTop
   });
   canvas.dispatchEvent(mouseEvent);
 }
@@ -482,7 +482,7 @@ function canvastmove(canvas){
   var touch = e.touches[0];
   var mouseEvent = new MouseEvent("mousemove", {
     clientX: touch.clientX- canvas.offsetLeft,
-    clientY: touch.clientY- canvas.offsetTop
+    clientY: touch.clientY+ canvas.offsetTop
   });
   canvas.dispatchEvent(mouseEvent);
 }
@@ -498,10 +498,10 @@ function canvasdown(canvas){
 	var modulation = 0;
 	if ((e.offsetY-centery)<0)
 		modulation = Math.min(Math.max(parseInt((centery-e.offsetY)*128/centery),0),127);
-	//setpitchbend(pitchbend);
-	//setmodulation(modulation);
-	$("#pblabel").text(e.offsetX);
-	$("#molabel").text(e.offsetY);
+	setpitchbend(pitchbend);
+	setmodulation(modulation);
+	$("#pblabel").text(pitchbend+" "+e.offsetX);
+	$("#molabel").text(modulation+" "+e.offsetY);
 }
 
 function canvasmove(canvas){
@@ -515,10 +515,10 @@ function canvasmove(canvas){
 		var modulation = 0;
 		if ((e.offsetY-centery)<0)
 			modulation = Math.min(Math.max(parseInt((centery-e.offsetY)*128/centery),0),127);
-		//setpitchbend(pitchbend);
-		//setmodulation(modulation);
-		$("#pblabel").text(e.offsetX);
-		$("#molabel").text(e.offsetY);
+		setpitchbend(pitchbend);
+		setmodulation(modulation);
+		$("#pblabel").text(pitchbend+" "+e.offsetX);
+		$("#molabel").text(modulation+" "+e.offsetY);
 		}
 }
 
