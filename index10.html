@@ -39,12 +39,13 @@
 	}
 	
 	select{
-	height:32px;
-	font-size:14pt;
-	font-weight:bold;
-	border-radius: 4px;
-	background:#444;
-	color:#ddd;
+		-webkit-appearance:none;
+		height:32px;
+		font-size:14pt;
+		font-weight:bold;
+		border-radius: 4px;
+		background:#444;
+		color:#ddd;
 	}
 	
 	option{
@@ -213,6 +214,7 @@ function setreverbtype(value){
 	//alert([0xF0,0x41,0x10,0x42,0x12,0x40,0x01,0x30,parseInt(select.selectedIndex),chksum,0xF7]);
 	if (midioutput)
 		midioutput.send([0xF0,0x41,0x10,0x42,0x12,0x40,0x01,0x30,parseInt(select.selectedIndex),chksum,0xF7]); // Roland sysex for reverb type
+	$(':focus').blur();
 }
 
 function setchorustype(value){
@@ -220,7 +222,8 @@ function setchorustype(value){
 	var data = [0x40,0x01,0x38,parseInt(select.selectedIndex)];
 	var chksum = parseInt(checksum(data));
 	if (midioutput)
-		midioutput.send([0xF0,0x41,0x10,0x42,0x12,0x40,0x01,0x30,parseInt(select.selectedIndex),chksum,0xF7]); // Roland sysex for chorus type
+		midioutput.send([0xF0,0x41,0x10,0x42,0x12,0x40,0x01,0x38,parseInt(select.selectedIndex),chksum,0xF7]); // Roland sysex for chorus type
+	$(':focus').blur();
 }
 
 function setresonance(value=64,inc=0){
@@ -677,17 +680,10 @@ function canvasup(canvas){
 	<fieldset style="height:10px;margin:5px;padding:0px;"></fieldset>
 	
 	<script>
-	$("#selectInterface").selectmenu({change: function(event,data){selectedInterface();}});
-	//$("#selectInterface")[0].addEventListener("change",function(event,data){selectedInterface();});
-	//$("#selectSound1").selectmenu({ width : 'auto',change: function(event,data){selectedSound1();}});
-	//$("#selectSound2").selectmenu({ width : 'auto',change: function(event,data){selectedSound2();}});
+	$("#selectInterface")[0].addEventListener("change",function(event,data){selectedInterface();});
 	$("#selectSound1")[0].addEventListener("change",function(event,data){selectedSound1();});
 	$("#selectSound2")[0].addEventListener("change",function(event,data){selectedSound2();});
-	$( "#radioset" ).buttonset();
-	//$("#selectReverb").selectmenu({width:'140pt',change: function(event,data){setreverbtype();}});	
-	//$("#selectReverb").val("Hall2(def)").selectmenu("refresh");	
-	//$("#selectChorus").selectmenu({width:'140pt',change: function(event,data){setchorustype();}});
-	//$("#selectChorus").val("Chorus3(def)").selectmenu("refresh");
+	$("#radioset").buttonset();
 	$("#selectReverb")[0].addEventListener("change",function(event,data){setreverbtype();});
 	$("#selectChorus")[0].addEventListener("change",function(event,data){setchorustype();});
 	$(window).bind('beforeunload', function(){
